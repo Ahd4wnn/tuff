@@ -5,6 +5,7 @@ import { supabase } from './lib/supabase'
 import { useAuthStore } from './store/authStore'
 import { useAuth } from './hooks/useAuth'
 import LoadingScreen from './components/LoadingScreen'
+import PWAInstallPrompt from './components/PWAInstallPrompt'
 import AppShell from './components/layout/AppShell'
 import Auth from './pages/Auth'
 import Onboarding from './pages/Onboarding'
@@ -67,6 +68,7 @@ export default function App() {
 
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <PWAInstallPrompt />
       <Toaster position="top-center" toastOptions={{
         style: { background: '#1A1A1A', color: '#F5F4F0', borderRadius: '12px', fontSize: '14px' }
       }} />

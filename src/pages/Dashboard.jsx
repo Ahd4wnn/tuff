@@ -80,6 +80,7 @@ export default function Dashboard() {
   })
   const [todayHabits, setTodayHabits] = useState([])
   const [checkingHabit, setCheckingHabit] = useState(null)
+  const [todayMITs, setTodayMITs] = useState(null)
 
   const today = new Date().toISOString().split('T')[0]
   const dayName = new Date().toLocaleDateString('en-US', { weekday: 'long' })
@@ -120,6 +121,7 @@ export default function Dashboard() {
       { data: habitsData },
       { data: journalData },
       { data: habitLogsData },
+      { data: mitData },
     ] = await Promise.all([
       supabase.from('goals').select('*', { count: 'exact', head: true })
         .eq('user_id', profile.id).eq('status', 'active'),
@@ -133,6 +135,8 @@ export default function Dashboard() {
         .eq('user_id', profile.id).eq('entry_date', today).maybeSingle(),
       supabase.from('habit_logs').select('habit_id')
         .eq('user_id', profile.id).eq('logged_date', today),
+      supabase.from('journal_entries').select('mit_1, mit_2, mit_3')
+        .eq('user_id', profile.id).eq('entry_date', today).maybeSingle(),
     ])
 
     const loggedIds = new Set((habitLogsData || []).map(l => l.habit_id))
@@ -141,6 +145,7 @@ export default function Dashboard() {
     }))
 
     setTodayHabits(habits)
+    setTodayMITs(mitData)
     setStats({
       goalsActive: goalsActive || 0,
       habitsToday: loggedIds.size,
@@ -183,17 +188,69 @@ export default function Dashboard() {
   return (
     <div style={{ paddingBottom: '2rem' }}>
 
-      {/* Header */}
+      {/* Header with time-aware context */}
       <div style={{ marginBottom: '1.75rem' }}>
-        <p style={{ color: '#7A7A7A', fontSize: '0.8rem', margin: '0 0 0.25rem', fontWeight: 500 }}>
+        <p style={{
+          color: '#7A7A7A', fontSize: '0.8rem',
+          margin: '0 0 0.25rem', fontWeight: 500,
+        }}>
           {dayName}, {dateStr}
         </p>
         <h2 style={{
           fontSize: 'clamp(1.75rem, 5vw, 2.4rem)', fontWeight: 900,
-          letterSpacing: '-0.04em', color: '#1A1A1A', margin: 0, lineHeight: 1.1,
+          letterSpacing: '-0.04em', color: '#1A1A1A',
+          margin: 0, lineHeight: 1.1,
         }}>
           {greeting},<br />{profile?.full_name?.split(' ')[0] || 'you'}.
         </h2>
+        {hour < 9 && (
+          <p style={{
+            marginTop: '0.5rem', fontSize: '0.825rem',
+            color: '#C8B89A', fontWeight: 600,
+          }}>
+            🌅 Morning window. Best time for deep work.
+          </p>
+        )}
+        {hour >= 9 && hour < 12 && (
+          <p style={{
+            marginTop: '0.5rem', fontSize: '0.825rem',
+            color: '#C8B89A', fontWeight: 600,
+          }}>
+            ⚡ Peak hours. Protect this time.
+          </p>
+        )}
+        {hour >= 12 && hour < 14 && (
+          <p style={{
+            marginTop: '0.5rem', fontSize: '0.825rem',
+            color: '#7A7A7A', fontWeight: 500,
+          }}>
+            🍱 Midday. Recharge. Then back at it.
+          </p>
+        )}
+        {hour >= 14 && hour < 17 && (
+          <p style={{
+            marginTop: '0.5rem', fontSize: '0.825rem',
+            color: '#C8B89A', fontWeight: 600,
+          }}>
+            📬 Afternoon. Good for shallow work + calls.
+          </p>
+        )}
+        {hour >= 17 && hour < 20 && (
+          <p style={{
+            marginTop: '0.5rem', fontSize: '0.825rem',
+            color: '#7A7A7A', fontWeight: 500,
+          }}>
+            🌇 Evening. Wind down. Plan tomorrow.
+          </p>
+        )}
+        {hour >= 20 && (
+          <p style={{
+            marginTop: '0.5rem', fontSize: '0.825rem',
+            color: '#C8B89A', fontWeight: 600,
+          }}>
+            🌙 Night. Journal and lock in tomorrow.
+          </p>
+        )}
       </div>
 
       {/* AI Quote card */}
@@ -257,6 +314,53 @@ export default function Dashboard() {
           </div>
         ))}
       </div>
+
+      {/* MIT preview */}
+      {todayMITs && (todayMITs.mit_1 || todayMITs.mit_2 || todayMITs.mit_3) && (
+        <div style={{
+          background: '#ECEAE4', border: '1px solid #E0DED8',
+          borderRadius: '1.1rem', padding: '1rem 1.25rem',
+          marginBottom: '1.5rem',
+        }}>
+          <div style={{
+            display: 'flex', justifyContent: 'space-between',
+            alignItems: 'center', marginBottom: '0.65rem',
+          }}>
+            <p style={{
+              fontSize: '0.75rem', fontWeight: 700, color: '#1A1A1A',
+              margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em',
+            }}>Today's MITs</p>
+            <a href="/journal" style={{
+              fontSize: '0.72rem', color: '#7A7A7A',
+              textDecoration: 'none', fontWeight: 500,
+              display: 'inline-flex', alignItems: 'center', gap: '0.2rem',
+            }}>
+              <span>Edit</span>
+              <ArrowRight size={12} strokeWidth={2.5} />
+            </a>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+            {[todayMITs.mit_1, todayMITs.mit_2, todayMITs.mit_3]
+              .filter(Boolean).map((mit, i) => (
+              <div key={i} style={{
+                display: 'flex', alignItems: 'center', gap: '0.6rem',
+                padding: '0.5rem 0.75rem',
+                background: 'rgba(245,244,240,0.7)', borderRadius: '0.65rem',
+              }}>
+                <div style={{
+                  width: '20px', height: '20px', borderRadius: '50%', flexShrink: 0,
+                  background: '#1A1A1A', display: 'flex',
+                  alignItems: 'center', justifyContent: 'center',
+                  fontSize: '0.62rem', color: '#F5F4F0', fontWeight: 700,
+                }}>{i + 1}</div>
+                <span style={{
+                  fontSize: '0.825rem', color: '#1A1A1A', fontWeight: 500,
+                }}>{mit}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Today's habits */}
       <div style={{ marginBottom: '1.5rem' }}>
