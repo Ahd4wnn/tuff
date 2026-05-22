@@ -7,6 +7,7 @@ Each file maps to one build session. Run them in order in Supabase SQL Editor.
 |------|---------|-------------|
 | 001_initial_schema.sql | Session 002 | All core tables: profiles, goals, milestones, habits, habit_logs, contacts, contact_interactions, projects, tasks, notes, journal_entries. RLS policies, auto-profile trigger, updated_at triggers. |
 | 002_projects_github.sql | Session 010 | Adds github_username to profiles, weekly_goal fields to projects |
+| 003_time_blocks.sql | Session 014 | Creates time_blocks table with check constraints, RLS, and updated_at trigger |
 
 
 ## How to run

@@ -10,6 +10,7 @@ import {
   BookOpen, 
   Book, 
   User,
+  Clock,
   LogOut
 } from 'lucide-react'
 
@@ -21,6 +22,7 @@ const NAV_ITEMS = [
   { path: '/projects',  label: 'Projects',  icon: Briefcase  },
   { path: '/knowledge', label: 'Knowledge', icon: BookOpen  },
   { path: '/journal',   label: 'Journal',   icon: Book  },
+  { path: '/time',      label: 'Time',      icon: Clock  },
   { path: '/identity',  label: 'Identity',  icon: User  },
 ]
 

@@ -16,6 +16,7 @@ import Projects from './pages/Projects'
 import Knowledge from './pages/Knowledge'
 import Journal from './pages/Journal'
 import Identity from './pages/Identity'
+import TimeBlocks from './pages/TimeBlocks'
 
 function AppRoutes() {
   const { user, onboardingDone, loading } = useAuth()
@@ -41,6 +42,7 @@ function AppRoutes() {
         <Route path="knowledge" element={<Knowledge />} />
         <Route path="journal" element={<Journal />} />
         <Route path="identity" element={<Identity />} />
+        <Route path="time" element={<TimeBlocks />} />
       </Route>
     </Routes>
   )
