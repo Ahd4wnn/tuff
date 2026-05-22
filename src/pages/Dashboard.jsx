@@ -170,8 +170,13 @@ export default function Dashboard() {
           .eq('logged_date', today)
       } else {
         await supabase.from('habit_logs')
-          .insert({ habit_id: habit.id, user_id: profile.id, logged_date: today })
+          .insert({
+            habit_id: habit.id,
+            user_id: profile.id,
+            logged_date: today,
+          })
       }
+      // Trigger on Supabase handles streak recalculation automatically.
       await fetchStats()
     } finally {
       setCheckingHabit(null)

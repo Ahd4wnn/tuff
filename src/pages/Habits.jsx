@@ -100,21 +100,26 @@ export default function Habits() {
     try {
       if (done) {
         await supabase.from('habit_logs').delete()
-          .eq('habit_id', habit.id).eq('user_id', profile.id).eq('logged_date', today)
-        setTodayLogs(s => { const n = new Set(s); n.delete(habit.id); return n })
+          .eq('habit_id', habit.id)
+          .eq('user_id', profile.id)
+          .eq('logged_date', today)
+        setTodayLogs(s => {
+          const n = new Set(s)
+          n.delete(habit.id)
+          return n
+        })
       } else {
-        await supabase.from('habit_logs')
-          .insert({ habit_id: habit.id, user_id: profile.id, logged_date: today })
+        await supabase.from('habit_logs').insert({
+          habit_id: habit.id,
+          user_id: profile.id,
+          logged_date: today,
+        })
         setTodayLogs(s => new Set(s).add(habit.id))
-        if (habit.current_streak !== undefined) {
-          await supabase.from('habits').update({
-            current_streak: (habit.current_streak || 0) + 1,
-            longest_streak: Math.max(habit.longest_streak || 0, (habit.current_streak || 0) + 1),
-          }).eq('id', habit.id)
-        }
       }
-      fetchHabits()
-      fetchWeekLogs()
+      // Streak is now calculated automatically by the Supabase trigger.
+      // Just re-fetch habits to get the updated streak values.
+      await fetchHabits()
+      await fetchWeekLogs()
     } finally {
       setChecking(null)
     }
